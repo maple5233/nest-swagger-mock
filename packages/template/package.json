@@ -1,0 +1,19 @@
+{
+  "name": "template",
+  "private": true,
+  "version": "1.0.0",
+  "description": "> TODO: description",
+  "homepage": "",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "!dist/tsconfig.build.tsbuildinfo",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "sh scripts/build.sh",
+    "test": "jest"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "packages",
+    ".commitlintrc.js",
+    ".eslintrc.js",
+    "jest.config.ts",
+    "jest.config.base.ts",
+  ]
+}
