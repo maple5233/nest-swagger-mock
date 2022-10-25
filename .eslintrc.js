@@ -78,6 +78,7 @@ module.exports = {
     'filenames',
     'jest',
     'node',
+    'eslint-comments',
   ],
   rules,
   overrides: [
@@ -94,6 +95,21 @@ module.exports = {
             allowIndexSignaturePropertyAccess: true,
           },
         ],
+      },
+    },
+    {
+      files: [
+        '*.controller.ts',
+        '*.module.ts',
+        '*.service.ts',
+        '*.filter.ts',
+        '*.middleware.ts',
+        '*.interceptor.ts',
+        '*.guard.ts',
+      ],
+      rules: {
+        // Conflict with nest's core mechanism
+        'class-methods-use-this': 'off',
       },
     },
   ],
