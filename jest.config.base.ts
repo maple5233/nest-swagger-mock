@@ -2,7 +2,7 @@ import type { Config } from 'jest'
 
 export const baseConfig: Config = {
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.(t|j)sx?$': '@swc/jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   verbose: true,
