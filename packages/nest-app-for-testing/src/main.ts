@@ -18,7 +18,7 @@ async function bootstrap() {
   const swaggerDocument = SwaggerModule.createDocument(app, options, config)
   SwaggerModule.setup('api', app, swaggerDocument)
 
-  await app.listen(3000)
+  await app.listen(2333)
 }
 
 bootstrap().then(() => console.log('Application start is complete'))
