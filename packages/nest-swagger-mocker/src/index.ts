@@ -1,3 +1,8 @@
-import { foo } from '@/lib'
+import { MockInterceptor } from '@/core/mock-interceptor'
+import type { ICreateMockInterceptorOptions } from '@/typings'
 
-export const main = () => console.log(foo)
+export class MockInterceptorFactory {
+  static create(options: ICreateMockInterceptorOptions) {
+    return new MockInterceptor(options)
+  }
+}

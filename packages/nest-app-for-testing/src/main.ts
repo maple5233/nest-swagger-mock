@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
-import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger'
+import { AppModule } from '@/app.module'
+import type { SwaggerDocumentOptions } from '@nestjs/swagger'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { MockInterceptorFactory } from 'nest-swagger-mocker'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -17,6 +19,13 @@ async function bootstrap() {
 
   const swaggerDocument = SwaggerModule.createDocument(app, options, config)
   SwaggerModule.setup('api', app, swaggerDocument)
+
+  app.useGlobalInterceptors(
+    MockInterceptorFactory.create({
+      document: swaggerDocument,
+      shouldMockChecker: () => true,
+    }),
+  )
 
   await app.listen(2333)
 }

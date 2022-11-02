@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports,@typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports,@typescript-eslint/no-var-requires -- this is a CommonJS script
 const { namingConventionOptions } = require('./eslint-naming-rules')
 
 module.exports = {
@@ -152,6 +152,8 @@ module.exports = {
   'prefer-template': ['error'],
   // https://typescript-eslint.io/rules/dot-notation
   '@typescript-eslint/dot-notation': ['error'],
+  // https://typescript-eslint.io/rules/consistent-type-imports
+  '@typescript-eslint/consistent-type-imports': ['error'],
   // https://typescript-eslint.io/rules/explicit-member-accessibility
   '@typescript-eslint/explicit-member-accessibility': [
     'error',
