@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
 import type { Request } from 'express'
 
+import { MockResponseGenerator } from '@/core/mock-response-generator'
 import { findSchemaByClassName } from '@/utils/find-schema-by-class-name'
 import { IMockInterceptorOptions } from '@/typings'
 import type { IFullFakeOptions, ResponseTypeMarkRecord } from '@/typings'
@@ -72,10 +73,17 @@ export class MockInterceptor implements NestInterceptor {
       this.logger.debug?.('No response schema found')
       return next.handle()
     }
-    this.logger.debug?.('Response schema found', responseSchema)
+    // this.logger.debug?.('Response schema found:', responseSchema)
 
-    // todo: generate fake data by responseSchema
-    const mockValue = faker.random.word()
+    const mockValue = new MockResponseGenerator(
+      this.options.document,
+      responseSchema,
+      responseType,
+      this.logger,
+    ).generate()
+
+    // ;(mockValue as Record<string, unknown>).$schema = responseSchema
+    // ;(mockValue as Record<string, unknown>).$document = this.options.document
 
     if (this.shouldMockChecker(context)) {
       return of(mockValue)

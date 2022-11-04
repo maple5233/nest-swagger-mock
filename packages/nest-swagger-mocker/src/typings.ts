@@ -2,7 +2,7 @@ import type { OpenAPIObject } from '@nestjs/swagger'
 import type { ExecutionContext, LoggerService } from '@nestjs/common'
 import type { Faker } from '@faker-js/faker'
 
-export type ClassType = { new (...args: any[]): any }
+export type ClassType = { new (...args: any[]): any; prototype: Object }
 export type ResponseTypeMarkRecord = Record<number | string, { type: ClassType }>
 
 export interface IMockInterceptorOptions {
