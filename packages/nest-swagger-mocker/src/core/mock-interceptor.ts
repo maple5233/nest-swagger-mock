@@ -22,7 +22,7 @@ export class MockInterceptor implements NestInterceptor {
     },
     logger: console,
     fakerOptions: {
-      defaultProbability: 0.1,
+      defaultProbability: 0.9,
       setup: () => null,
     },
   }
@@ -80,10 +80,11 @@ export class MockInterceptor implements NestInterceptor {
       responseSchema,
       responseType,
       this.logger,
+      this.fakerOptions,
     ).generate()
 
     // ;(mockValue as Record<string, unknown>).$schema = responseSchema
-    // ;(mockValue as Record<string, unknown>).$document = this.options.document
+    ;(mockValue as Record<string, unknown>).$document = this.options.document
 
     if (this.shouldMockChecker(context)) {
       return of(mockValue)

@@ -18,7 +18,8 @@ export interface IFakeOptions {
   setup?: (faker: Faker) => void
   /**
    * default probability for faker.maybe
-   * @default 0.1
+   * will be use for when the property is not required has value
+   * @default 0.9
    */
   defaultProbability?: number
 }

@@ -3,7 +3,7 @@ import type { OpenAPIObject } from '@nestjs/swagger'
 import type { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface'
 import type { LoggerService } from '@nestjs/common'
 
-import type { ClassType } from '@/typings'
+import type { ClassType, IFullFakeOptions } from '@/typings'
 import type { FakeNumberOptions } from '@/decorators/fake-number'
 import { getFakeNumberOptions } from '@/decorators/fake-number'
 import type { FakeStringOptions } from '@/decorators/fake-string'
@@ -18,6 +18,7 @@ export class MockResponseGenerator {
     private readonly schema: SchemaObject,
     private readonly classType: ClassType,
     private readonly logger: LoggerService,
+    private readonly globalFakeOptions: IFullFakeOptions,
   ) {}
 
   getDefaultOrExampleValue(schema = this.schema) {
@@ -45,6 +46,16 @@ export class MockResponseGenerator {
     const properties = this.schema.properties ?? {}
 
     for (const [key, value] of Object.entries(properties)) {
+      const required = this.schema.required?.includes(key)
+
+      if (
+        this.schema.required &&
+        !required &&
+        faker.helpers.maybe(() => false, { probability: this.globalFakeOptions.defaultProbability })
+      ) {
+        continue
+      }
+
       if ('$ref' in value) {
         const subSchema = dereferenceSchema(this.document, value)
         if (!subSchema) {
@@ -61,6 +72,7 @@ export class MockResponseGenerator {
           subSchema,
           subClassType,
           this.logger,
+          this.globalFakeOptions,
         ).generate(subClassType)
         continue
       }
@@ -82,6 +94,7 @@ export class MockResponseGenerator {
             subSchema,
             subClassType,
             this.logger,
+            this.globalFakeOptions,
           ).generate(subClassType)
         })
         responseBuilder[key] = Object.assign({}, ...responses)
@@ -141,6 +154,7 @@ export class MockResponseGenerator {
                 arrayItemSchema,
                 arrayItemClassTypeFromDecorator ?? arrayItemClassType,
                 this.logger,
+                this.globalFakeOptions,
               ).generate(),
             )
             break
@@ -159,6 +173,7 @@ export class MockResponseGenerator {
                   },
                   currentClassType,
                   this.logger,
+                  this.globalFakeOptions,
                 ).generate(),
               )
               .map((item) => (item as Record<string, unknown>)[key])
@@ -177,6 +192,7 @@ export class MockResponseGenerator {
             value,
             currentClassType,
             this.logger,
+            this.globalFakeOptions,
           ).generate()
         }
 
