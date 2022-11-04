@@ -105,7 +105,7 @@ module.exports = {
    */
 
   // https://eslint.org/docs/rules/complexity
-  complexity: ['warn', { max: 15 }],
+  complexity: ['error', { max: 15 }],
   // https://eslint.org/docs/rules/no-eval
   'no-eval': ['error'],
   // https://eslint.org/docs/rules/accessor-pairs

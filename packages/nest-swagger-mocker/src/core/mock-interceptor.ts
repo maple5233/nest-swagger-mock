@@ -1,9 +1,9 @@
 import { constants as HTTPConstants } from 'http2'
 import { of } from 'rxjs'
-import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common'
 import { Injectable } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
 import type { Request } from 'express'
+import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common'
 
 import { MockResponseGenerator } from '@/core/mock-response-generator'
 import { findSchemaByClassName } from '@/utils/find-schema-by-class-name'
@@ -73,7 +73,6 @@ export class MockInterceptor implements NestInterceptor {
       this.logger.debug?.('No response schema found')
       return next.handle()
     }
-    // this.logger.debug?.('Response schema found:', responseSchema)
 
     const mockValue = new MockResponseGenerator(
       this.options.document,
@@ -83,8 +82,8 @@ export class MockInterceptor implements NestInterceptor {
       this.fakerOptions,
     ).generate()
 
-    // ;(mockValue as Record<string, unknown>).$schema = responseSchema
-    ;(mockValue as Record<string, unknown>).$document = this.options.document
+    // mockValue.$schema = responseSchema
+    // mockValue.$document = this.options.document
 
     if (this.shouldMockChecker(context)) {
       return of(mockValue)

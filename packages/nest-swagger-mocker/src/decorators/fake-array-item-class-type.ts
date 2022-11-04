@@ -12,5 +12,8 @@ import type { ClassType } from '@/typings'
 export const FakeArrayItemClassType = (type: ClassType) =>
   Reflect.metadata(FAKE_ARRAY_ITEM_CLASS_TYPE_METADATA_KEY, type)
 
-export const getFakeArrayItemClassType = (target: any, propertyKey: string) =>
+export const getFakeArrayItemClassType = (
+  target: any,
+  propertyKey: string,
+): ClassType | undefined =>
   Reflect.getMetadata(FAKE_ARRAY_ITEM_CLASS_TYPE_METADATA_KEY, target, propertyKey)

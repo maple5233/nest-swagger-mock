@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports,@typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports,@typescript-eslint/no-var-requires -- CommonJS file
 const rules = require('./eslint-rules')
 
 module.exports = {
