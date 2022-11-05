@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger'
 import {
   ArrayCount,
   FakeNumber,
@@ -8,6 +8,14 @@ import {
 } from 'nest-swagger-mocker'
 
 export class HelloMessageResponse {
+  @ApiProperty({
+    description: 'Hello message',
+    type: String,
+  })
+  @FakeString({
+    type: 'words',
+    maxWordsCount: 3,
+  })
   message: string
 }
 
@@ -76,7 +84,7 @@ export class InnerObject {
   innerObject2: MoreInnerObject
 }
 
-export class GetNormalResponse {
+export class NormalResponse {
   /* ====== string part ====== */
 
   @ApiProperty({
@@ -242,4 +250,36 @@ export class GetNormalResponse {
     type: InnerObject,
   })
   objectsWithClass: InnerObject[]
+}
+
+export class Bar {
+  @ApiProperty({
+    type: 'string',
+  })
+  @FakeString({
+    type: 'random',
+    maxLength: 10,
+  })
+  message2: string
+}
+
+@ApiExtraModels(Bar, HelloMessageResponse)
+// @FakeExtraClassTypes([Bar, HelloMessageResponse])
+export class ResponseWithPropertyWhichUseAllOf {
+  @ApiProperty({
+    allOf: [
+      { $ref: getSchemaPath(HelloMessageResponse) },
+      {
+        $ref: getSchemaPath(Bar),
+      },
+      {
+        properties: {
+          message3: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+  })
+  allOf: Bar & HelloMessageResponse & { message3: string }
 }

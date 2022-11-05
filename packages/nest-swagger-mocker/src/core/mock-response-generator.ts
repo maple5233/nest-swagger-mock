@@ -13,6 +13,7 @@ import {
   getFakeArrayItemClassType,
   getFakeStringOptions,
   getFakeNumberOptions,
+  getFakeExtraClassTypes,
 } from '@/decorators'
 import type { IFakeBooleanOptions, FakeStringOptions, FakeNumberOptions } from '@/decorators'
 import type { ClassType, IFullFakeOptions } from '@/typings'
@@ -177,6 +178,50 @@ export class MockResponseGenerator {
   }
 
   /**
+   * for allOf / oneOf / anyOf, we still want to use the metadata for deciding the fake rule
+   * so we need to get all the class type of the allOf items
+   * The First way, we can get the class type list from the metadata (key 'swagger/apiExtraModels') when user use @ApiExtraModels
+   * The second way, we can get the class type list from the metadata (key FAKE_EXTRA_CLASS_TYPES_METADATA_KEY) when user use @FakeExtraClassTypes
+   *
+   * @param classType the class which has @ApiExtraModels or @FakeExtraClassTypes
+   */
+  private static getExtraClassTypes(classType: ClassType) {
+    return [
+      ...(getFakeExtraClassTypes(classType) ?? []),
+      ...((Reflect.getMetadata('swagger/apiExtraModels', classType) as ClassType[]) ?? []),
+    ]
+  }
+
+  /**
+   * find the match ClassType of subSchema from the metadata of fatherClassType
+   * @param fatherClassType
+   * @param subSchema
+   * @private
+   */
+  private static getExtraClassType(
+    fatherClassType: ClassType,
+    subSchema: SchemaObject | ReferenceObject,
+  ) {
+    const extraClassTypes = MockResponseGenerator.getExtraClassTypes(fatherClassType)
+    if ('$ref' in subSchema) {
+      return extraClassTypes.find((classType) => classType.name === subSchema.$ref.split('/').pop())
+    }
+    return
+  }
+
+  /**
+   * generate a fake class with a property which has specified design:type metadata
+   * @param propertyKey
+   * @param propertyClassType
+   * @private
+   */
+  private static generateFakeClassType(propertyKey: string, propertyClassType?: ClassType) {
+    const fakeClassType = class {}
+    Reflect.defineMetadata('design:type', propertyClassType, fakeClassType.prototype, propertyKey)
+    return fakeClassType
+  }
+
+  /**
    * For allOf, we will merge all the sub schema of the allOf together
    * @param schema
    * @param classType
@@ -188,9 +233,12 @@ export class MockResponseGenerator {
       return
     }
 
-    const responses = schema.allOf.map((subSchema) =>
-      this.generateValueFromReferenceObject(subSchema, classType, propertyKey),
-    )
+    const responses = schema.allOf.map((subSchema) => {
+      const extraClassType = MockResponseGenerator.getExtraClassType(classType, subSchema)
+      const fakeClassType = MockResponseGenerator.generateFakeClassType(propertyKey, extraClassType)
+      const subClassType = extraClassType ? fakeClassType : classType
+      return this.generateValueFromReferenceObject(subSchema, subClassType, propertyKey)
+    })
 
     return Object.assign({}, ...responses) as unknown
   }
@@ -198,7 +246,7 @@ export class MockResponseGenerator {
   /**
    * dereference the schema and generate the value
    * @param schema
-   * @param classType
+   * @param classType the ClassType match the schema
    * @param propertyKey
    * @private
    */
@@ -223,7 +271,7 @@ export class MockResponseGenerator {
       subClassType,
       this.logger,
       this.globalFakeOptions,
-    ).generate(subClassType)
+    ).generate()
   }
 
   /**
@@ -256,7 +304,7 @@ export class MockResponseGenerator {
        * @see https://codesandbox.io/s/wispy-forest-ij56bq?file=/src/index.ts
        * typescript will not decorate the type of the array item
        */
-      const arrayItemClassType = getPropertyMetaDataFromClass<ClassType>(classType, propertyKey)
+      const arrayItemClassType = getPropertyMetaDataFromClass<ClassType>(classType, propertyKey)!
       /**
        * if the @FakeArrayItemClassType is used, we will use the metadata
        */

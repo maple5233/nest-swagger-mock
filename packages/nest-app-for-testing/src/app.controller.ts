@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common'
 import { AppService } from './app.service'
-import { GetNormalResponse, HelloMessageResponse } from '@/app.dto'
+import { NormalResponse, HelloMessageResponse, ResponseWithPropertyWhichUseAllOf } from '@/app.dto'
 import { ApiResponse } from '@nestjs/swagger'
 
 @Controller()
@@ -16,9 +16,17 @@ export class AppController {
 
   @Get('normal')
   @ApiResponse({
-    type: GetNormalResponse,
+    type: NormalResponse,
   })
   getNormal() {
+    throw new Error('Not implemented')
+  }
+
+  @Get('allOf')
+  @ApiResponse({
+    type: ResponseWithPropertyWhichUseAllOf,
+  })
+  getAllOf() {
     throw new Error('Not implemented')
   }
 }
