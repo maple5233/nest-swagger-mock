@@ -1,7 +1,12 @@
 import { Controller, Get } from '@nestjs/common'
 import { AppService } from './app.service'
-import { NormalResponse, HelloMessageResponse, ResponseWithPropertyWhichUseAllOf } from '@/app.dto'
-import { ApiResponse } from '@nestjs/swagger'
+import {
+  NormalResponse,
+  HelloMessageResponse,
+  ResponseWithPropertyWhichUseAllOf,
+  Bar,
+} from '@/app.dto'
+import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger'
 
 @Controller()
 export class AppController {
@@ -27,6 +32,31 @@ export class AppController {
     type: ResponseWithPropertyWhichUseAllOf,
   })
   getAllOf() {
+    throw new Error('Not implemented')
+  }
+
+  @Get('allOf2')
+  @ApiExtraModels(Bar, HelloMessageResponse)
+  @ApiResponse({
+    schema: {
+      allOf: [
+        {
+          $ref: getSchemaPath(HelloMessageResponse),
+        },
+        {
+          $ref: getSchemaPath(Bar),
+        },
+        {
+          properties: {
+            message3: {
+              type: 'string',
+            },
+          },
+        },
+      ],
+    },
+  })
+  getAllOf2() {
     throw new Error('Not implemented')
   }
 }

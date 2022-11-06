@@ -240,7 +240,7 @@ export class MockResponseGenerator {
       return this.generateValueFromReferenceObject(subSchema, subClassType, propertyKey)
     })
 
-    return Object.assign({}, ...responses) as unknown
+    return Object.assign({}, ...responses) as Record<string, unknown>
   }
 
   /**

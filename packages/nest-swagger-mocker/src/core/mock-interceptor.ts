@@ -7,8 +7,9 @@ import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/com
 
 import { MockResponseGenerator } from '@/core/mock-response-generator'
 import { findSchemaByClassName } from '@/utils/find-schema-by-class-name'
+import { dereferenceSchema } from '@/utils/dereference-schema'
 import { IMockInterceptorOptions } from '@/typings'
-import type { IFullFakeOptions, ResponseTypeMarkRecord } from '@/typings'
+import type { IFullFakeOptions, ResponseTypeMarkRecord, ClassType } from '@/typings'
 
 @Injectable()
 export class MockInterceptor implements NestInterceptor {
@@ -43,7 +44,7 @@ export class MockInterceptor implements NestInterceptor {
     this.fakerOptions.setup(faker)
   }
 
-  private static getResponseType(method: Function) {
+  private getResponseTypeAndSchema(method: Function, actionName: string) {
     const responseTypeMarkRecord = Reflect.getMetadata(
       'swagger/apiResponse',
       method,
@@ -55,38 +56,102 @@ export class MockInterceptor implements NestInterceptor {
 
     const responseTypeMark =
       responseTypeMarkRecord[HTTPConstants.HTTP_STATUS_OK] ?? responseTypeMarkRecord.default
-    return responseTypeMark.type
+    const extraTypes = Reflect.getMetadata('swagger/apiExtraModels', method) as ClassType[]
+    const fakeClass = class {}
+    const innerFakeClass = class {}
+    Reflect.defineMetadata('swagger/apiExtraModel', extraTypes, innerFakeClass)
+    Reflect.defineMetadata('design:type', innerFakeClass, fakeClass.prototype, 'data')
+
+    const type = responseTypeMark?.type
+    const schema = dereferenceSchema(this.options.document, responseTypeMark?.schema)
+
+    if (!type && !schema) {
+      this.logger.warn?.('Both response type and schema not found, skip mocking', actionName)
+      return undefined
+    }
+
+    if (type && schema) {
+      this.logger.warn?.(
+        'Both response type and schema found, use schema to mock response',
+        actionName,
+      )
+      return {
+        use: 'schema',
+        schema: {
+          type: 'object',
+          /**
+           * If user use `@ApiResponse({ schema: {...} })` to define response type,
+           * in order to reuse the logic when using type
+           * we need to wrap the schema with a fake class with `data` property
+           */
+          properties: {
+            data: schema,
+          },
+        },
+        type: fakeClass,
+      }
+    }
+
+    if (type) {
+      const schemaByClassName = findSchemaByClassName(this.options.document, type.name)
+      if (!schemaByClassName) {
+        this.logger.warn?.('Type found but it is invalid, skip mocking', actionName)
+        return undefined
+      }
+
+      return {
+        use: 'type',
+        type,
+        schema: schemaByClassName,
+      }
+    }
+
+    if (schema) {
+      return {
+        use: 'schema',
+        schema: {
+          type: 'object',
+          properties: {
+            data: schema,
+          },
+        },
+        type: fakeClass,
+      }
+    }
+
+    return undefined
   }
 
   intercept(context: ExecutionContext, next: CallHandler) {
     const method = context.getHandler()
-
-    const responseType = MockInterceptor.getResponseType(method)
-    if (!responseType) {
-      this.logger.debug?.('No response type found')
-      return next.handle()
-    }
-
-    const responseClassName = responseType.name
-    const responseSchema = findSchemaByClassName(this.options.document, responseClassName)
-    if (!responseSchema) {
-      this.logger.debug?.('No response schema found')
-      return next.handle()
-    }
-
-    const mockValue = new MockResponseGenerator(
-      this.options.document,
-      responseSchema,
-      responseType,
-      this.logger,
-      this.fakerOptions,
-    ).generate()
-
-    // mockValue.$schema = responseSchema
-    // mockValue.$document = this.options.document
+    const actionName = `${context.getClass().name}.${method.name}`
 
     if (this.shouldMockChecker(context)) {
-      return of(mockValue)
+      const responseTypeAndSchema = this.getResponseTypeAndSchema(method, actionName)
+
+      if (!responseTypeAndSchema) {
+        return next.handle()
+      }
+
+      try {
+        const mockResult = new MockResponseGenerator(
+          this.options.document,
+          responseTypeAndSchema.schema,
+          responseTypeAndSchema.type,
+          this.logger,
+          this.fakerOptions,
+        ).generate()
+        const mockValue =
+          responseTypeAndSchema.use === 'type'
+            ? mockResult
+            : (mockResult.data as Record<string, unknown>)
+
+        // mockValue.$document = this.options.document
+        return of(mockValue)
+      } catch (error) {
+        this.logger.error?.('Error occurred while mocking response', `${actionName}`, error)
+        return next.handle()
+      }
     }
 
     return next.handle()

@@ -12,9 +12,13 @@ import type {
  */
 export function dereferenceSchema(
   document: OpenAPIObject,
-  schema: SchemaObject | ReferenceObject,
+  schema: SchemaObject | ReferenceObject | undefined,
   recursionDepth = 0,
 ): SchemaObject | undefined {
+  if (!schema) {
+    return
+  }
+
   if (recursionDepth > 5) {
     return
   }
