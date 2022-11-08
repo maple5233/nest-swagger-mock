@@ -34,7 +34,7 @@ export type FakeStringOptions =
       type: 'default'
     }
 
-export const FakeString = (options: FakeStringOptions) =>
+export const FakeString = (options: FakeStringOptions): PropertyDecorator =>
   Reflect.metadata(FAKE_STRING_METADATA_KEY, options)
 export const getFakeStringOptions = (target: any, propertyKey: string) =>
   Reflect.getMetadata(FAKE_STRING_METADATA_KEY, target, propertyKey) as

@@ -9,7 +9,7 @@ import type { ClassType } from '@/typings'
  *
  * @param type a class type
  */
-export const FakeArrayItemClassType = (type: ClassType) =>
+export const FakeArrayItemClassType = (type: ClassType): PropertyDecorator =>
   Reflect.metadata(FAKE_ARRAY_ITEM_CLASS_TYPE_METADATA_KEY, type)
 
 export const getFakeArrayItemClassType = (

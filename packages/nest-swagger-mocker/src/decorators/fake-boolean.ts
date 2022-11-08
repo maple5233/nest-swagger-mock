@@ -4,7 +4,7 @@ export interface IFakeBooleanOptions {
   probability: number
 }
 
-export const FakeBoolean = (options: IFakeBooleanOptions) =>
+export const FakeBoolean = (options: IFakeBooleanOptions): PropertyDecorator =>
   Reflect.metadata(FAKE_BOOLEAN_METADATA_KEY, options)
 export const getFakeBooleanOptions = (target: any, propertyKey: string) =>
   Reflect.getMetadata(FAKE_BOOLEAN_METADATA_KEY, target, propertyKey) as
