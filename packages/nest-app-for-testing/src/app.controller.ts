@@ -5,6 +5,8 @@ import {
   HelloMessageResponse,
   ResponseWithPropertyWhichUseAllOf,
   Bar,
+  ResponseWithPropertyWhichUseOneOf,
+  ResponseWithPropertyWhichUseAnyOf,
 } from '@/app.dto'
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger'
 
@@ -48,7 +50,7 @@ export class AppController {
         },
         {
           properties: {
-            message3: {
+            message4: {
               type: 'string',
             },
           },
@@ -57,6 +59,60 @@ export class AppController {
     },
   })
   getAllOf2() {
+    throw new Error('Not implemented')
+  }
+
+  @ApiExtraModels(Bar, HelloMessageResponse)
+  @Get('oneOf')
+  @ApiResponse({
+    schema: {
+      allOf: [
+        {
+          $ref: getSchemaPath(HelloMessageResponse),
+        },
+        {
+          $ref: getSchemaPath(Bar),
+        },
+      ],
+    },
+  })
+  getOneOf() {
+    throw new Error('Not implemented')
+  }
+
+  @ApiExtraModels(Bar, HelloMessageResponse)
+  @Get('oneOf2')
+  @ApiResponse({
+    type: ResponseWithPropertyWhichUseOneOf,
+  })
+  getOneOf2() {
+    throw new Error('Not implemented')
+  }
+
+  @ApiExtraModels(Bar, HelloMessageResponse)
+  @Get('anyOf')
+  @ApiResponse({
+    schema: {
+      anyOf: [
+        {
+          $ref: getSchemaPath(HelloMessageResponse),
+        },
+        {
+          $ref: getSchemaPath(Bar),
+        },
+      ],
+    },
+  })
+  getAnyOf() {
+    throw new Error('Not implemented')
+  }
+
+  @ApiExtraModels(Bar, HelloMessageResponse)
+  @Get('anyOf2')
+  @ApiResponse({
+    type: ResponseWithPropertyWhichUseAnyOf,
+  })
+  getAnyOf2() {
     throw new Error('Not implemented')
   }
 }

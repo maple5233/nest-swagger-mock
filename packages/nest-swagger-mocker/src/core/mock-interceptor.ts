@@ -6,10 +6,15 @@ import type { Request } from 'express'
 import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common'
 
 import { MockResponseGenerator } from '@/core/mock-response-generator'
+import {
+  SWAGGER_API_EXTRA_MODELS_METADATA_KEY,
+  SWAGGER_API_RESPONSE_METADATA_KEY,
+} from '@/decorators/constants'
 import { findSchemaByClassName } from '@/utils/find-schema-by-class-name'
 import { dereferenceSchema } from '@/utils/dereference-schema'
 import { IMockInterceptorOptions } from '@/typings'
-import type { IFullFakeOptions, ResponseTypeMarkRecord, ClassType } from '@/typings'
+import type { IFullFakeOptions, ResponseTypeMarkRecord } from '@/typings'
+import { setPropertyMetaDataToClass } from '@/utils/reflect'
 
 @Injectable()
 export class MockInterceptor implements NestInterceptor {
@@ -46,7 +51,7 @@ export class MockInterceptor implements NestInterceptor {
 
   private getResponseTypeAndSchema(method: Function, actionName: string) {
     const responseTypeMarkRecord = Reflect.getMetadata(
-      'swagger/apiResponse',
+      SWAGGER_API_RESPONSE_METADATA_KEY,
       method,
     ) as ResponseTypeMarkRecord
 
@@ -56,11 +61,12 @@ export class MockInterceptor implements NestInterceptor {
 
     const responseTypeMark =
       responseTypeMarkRecord[HTTPConstants.HTTP_STATUS_OK] ?? responseTypeMarkRecord.default
-    const extraTypes = Reflect.getMetadata('swagger/apiExtraModels', method) as ClassType[]
-    const fakeClass = class {}
-    const innerFakeClass = class {}
-    Reflect.defineMetadata('swagger/apiExtraModel', extraTypes, innerFakeClass)
-    Reflect.defineMetadata('design:type', innerFakeClass, fakeClass.prototype, 'data')
+    const extraTypes = MockResponseGenerator.getExtraClassTypes(method)
+
+    const fakeClass = class FakeClassForSchema {}
+    const innerFakeClass = class FakeClassForSchemaDataProperty {}
+    Reflect.defineMetadata(SWAGGER_API_EXTRA_MODELS_METADATA_KEY, extraTypes, fakeClass)
+    setPropertyMetaDataToClass(fakeClass, 'data', innerFakeClass)
 
     const type = responseTypeMark?.type
     const schema = dereferenceSchema(this.options.document, responseTypeMark?.schema)

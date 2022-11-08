@@ -14,7 +14,7 @@ export class HelloMessageResponse {
   })
   @FakeString({
     type: 'words',
-    maxWordsCount: 3,
+    maxWordsCount: 10,
   })
   message: string
 }
@@ -261,6 +261,14 @@ export class Bar {
     maxLength: 10,
   })
   message2: string
+
+  @ApiProperty({
+    type: 'string',
+  })
+  @FakeString({
+    type: 'uuid',
+  })
+  message3: string
 }
 
 @ApiExtraModels(Bar, HelloMessageResponse)
@@ -274,7 +282,7 @@ export class ResponseWithPropertyWhichUseAllOf {
       },
       {
         properties: {
-          message3: {
+          message4: {
             type: 'string',
           },
         },
@@ -282,4 +290,30 @@ export class ResponseWithPropertyWhichUseAllOf {
     ],
   })
   allOf: Bar & HelloMessageResponse & { message3: string }
+}
+
+@ApiExtraModels(Bar, HelloMessageResponse)
+export class ResponseWithPropertyWhichUseOneOf {
+  @ApiProperty({
+    oneOf: [
+      { $ref: getSchemaPath(HelloMessageResponse) },
+      {
+        $ref: getSchemaPath(Bar),
+      },
+    ],
+  })
+  oneOf: Bar | HelloMessageResponse
+}
+
+@ApiExtraModels(Bar, HelloMessageResponse)
+export class ResponseWithPropertyWhichUseAnyOf {
+  @ApiProperty({
+    anyOf: [
+      { $ref: getSchemaPath(HelloMessageResponse) },
+      {
+        $ref: getSchemaPath(Bar),
+      },
+    ],
+  })
+  anyOf: Bar | HelloMessageResponse
 }

@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { omit } from 'lodash'
 import type { OpenAPIObject } from '@nestjs/swagger'
 import type { LoggerService } from '@nestjs/common'
 import type {
@@ -7,6 +8,7 @@ import type {
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface'
 
 import { dereferenceSchema } from '@/utils/dereference-schema'
+import { getPropertyMetaDataFromClass, setPropertyMetaDataToClass } from '@/utils/reflect'
 import {
   getArrayCount,
   getFakeBooleanOptions,
@@ -15,10 +17,9 @@ import {
   getFakeNumberOptions,
   getFakeExtraClassTypes,
 } from '@/decorators'
+import { SWAGGER_API_EXTRA_MODELS_METADATA_KEY } from '@/decorators/constants'
 import type { IFakeBooleanOptions, FakeStringOptions, FakeNumberOptions } from '@/decorators'
 import type { ClassType, IFullFakeOptions } from '@/typings'
-import { getPropertyMetaDataFromClass } from '@/utils/reflect'
-import { omit } from 'lodash'
 
 export class MockResponseGenerator {
   constructor(
@@ -185,10 +186,11 @@ export class MockResponseGenerator {
    *
    * @param classType the class which has @ApiExtraModels or @FakeExtraClassTypes
    */
-  private static getExtraClassTypes(classType: ClassType) {
+  static getExtraClassTypes(classType: ClassType | Function) {
     return [
       ...(getFakeExtraClassTypes(classType) ?? []),
-      ...((Reflect.getMetadata('swagger/apiExtraModels', classType) as ClassType[]) ?? []),
+      ...((Reflect.getMetadata(SWAGGER_API_EXTRA_MODELS_METADATA_KEY, classType) ??
+        []) as ClassType[]),
     ]
   }
 
@@ -217,7 +219,7 @@ export class MockResponseGenerator {
    */
   private static generateFakeClassType(propertyKey: string, propertyClassType?: ClassType) {
     const fakeClassType = class {}
-    Reflect.defineMetadata('design:type', propertyClassType, fakeClassType.prototype, propertyKey)
+    setPropertyMetaDataToClass(fakeClassType, propertyKey, propertyClassType)
     return fakeClassType
   }
 
@@ -241,6 +243,36 @@ export class MockResponseGenerator {
     })
 
     return Object.assign({}, ...responses) as Record<string, unknown>
+  }
+
+  private generateValueFromOneOf(schema: SchemaObject, classType: ClassType, propertyKey: string) {
+    if (!schema.oneOf) {
+      return
+    }
+
+    const responses = schema.oneOf.map((subSchema) => {
+      const extraClassType = MockResponseGenerator.getExtraClassType(classType, subSchema)
+      const fakeClassType = MockResponseGenerator.generateFakeClassType(propertyKey, extraClassType)
+      const subClassType = extraClassType ? fakeClassType : classType
+      return this.generateValueFromReferenceObject(subSchema, subClassType, propertyKey)
+    })
+
+    return responses[faker.datatype.number({ min: 0, max: responses.length - 1 })]
+  }
+
+  private generateValueFromAnyOf(schema: SchemaObject, classType: ClassType, propertyKey: string) {
+    if (!schema.anyOf) {
+      return
+    }
+
+    const responses = schema.anyOf.map((subSchema) => {
+      const extraClassType = MockResponseGenerator.getExtraClassType(classType, subSchema)
+      const fakeClassType = MockResponseGenerator.generateFakeClassType(propertyKey, extraClassType)
+      const subClassType = extraClassType ? fakeClassType : classType
+      return this.generateValueFromReferenceObject(subSchema, subClassType, propertyKey)
+    })
+
+    return responses[faker.datatype.number({ min: 0, max: responses.length - 1 })]
   }
 
   /**
@@ -365,6 +397,16 @@ export class MockResponseGenerator {
 
       if ('allOf' in value) {
         responseBuilder[key] = this.generateValueFromAllOf(value, currentClassType, key)
+        continue
+      }
+
+      if ('oneOf' in value) {
+        responseBuilder[key] = this.generateValueFromOneOf(value, currentClassType, key)
+        continue
+      }
+
+      if ('anyOf' in value) {
+        responseBuilder[key] = this.generateValueFromAnyOf(value, currentClassType, key)
         continue
       }
 
