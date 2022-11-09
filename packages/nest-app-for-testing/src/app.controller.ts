@@ -7,6 +7,7 @@ import {
   Bar,
   ResponseWithPropertyWhichUseOneOf,
   ResponseWithPropertyWhichUseAnyOf,
+  ResponseWithAfterResponseHook,
 } from '@/app.dto'
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger'
 
@@ -113,6 +114,14 @@ export class AppController {
     type: ResponseWithPropertyWhichUseAnyOf,
   })
   getAnyOf2() {
+    throw new Error('Not implemented')
+  }
+
+  @Get('hooked')
+  @ApiResponse({
+    type: ResponseWithAfterResponseHook,
+  })
+  getHooked() {
     throw new Error('Not implemented')
   }
 }

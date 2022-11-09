@@ -3,23 +3,24 @@ import { omit } from 'lodash'
 import type { OpenAPIObject } from '@nestjs/swagger'
 import type { LoggerService } from '@nestjs/common'
 import type {
-  SchemaObject,
   ReferenceObject,
+  SchemaObject,
 } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface'
 
 import { dereferenceSchema } from '@/utils/dereference-schema'
 import { getPropertyMetaDataFromClass, setPropertyMetaDataToClass } from '@/utils/reflect'
+import type { FakeNumberOptions, FakeStringOptions, IFakeBooleanOptions } from '@/decorators'
 import {
   getArrayCount,
-  getFakeBooleanOptions,
   getFakeArrayItemClassType,
-  getFakeStringOptions,
-  getFakeNumberOptions,
+  getFakeBooleanOptions,
   getFakeExtraClassTypes,
+  getFakeNumberOptions,
+  getFakeStringOptions,
 } from '@/decorators'
 import { SWAGGER_API_EXTRA_MODELS_METADATA_KEY } from '@/decorators/constants'
-import type { IFakeBooleanOptions, FakeStringOptions, FakeNumberOptions } from '@/decorators'
 import type { ClassType, IFullFakeOptions } from '@/typings'
+import { getAfterHook } from '@/decorators/after-hook'
 
 export class MockResponseGenerator {
   constructor(
@@ -376,14 +377,11 @@ export class MockResponseGenerator {
       .map((item) => item[propertyKey])
   }
 
-  generate(currentClassType = this.classType): Record<string, unknown> {
-    const defaultOrExampleValue = this.generateValueFromDefaultOrExampleOrEnum()
-    if (defaultOrExampleValue) {
-      return { ...defaultOrExampleValue }
-    }
-
+  private generateValueFromProperties(
+    properties: Record<string, SchemaObject | ReferenceObject>,
+    currentClassType = this.classType,
+  ) {
     const responseBuilder: Record<string, unknown> = {}
-    const properties = this.schema.properties ?? {}
 
     for (const [key, value] of Object.entries(properties)) {
       if (this.shouldSkipDueToItIsAnOptionalKey(this.schema, key)) {
@@ -458,5 +456,20 @@ export class MockResponseGenerator {
     }
 
     return responseBuilder
+  }
+
+  generate(currentClassType = this.classType): Record<string, unknown> {
+    const defaultOrExampleValue = this.generateValueFromDefaultOrExampleOrEnum()
+    if (defaultOrExampleValue) {
+      return { ...defaultOrExampleValue }
+    }
+
+    const properties = this.schema.properties ?? {}
+    const response = this.generateValueFromProperties(properties, currentClassType)
+    const afterHook = getAfterHook(currentClassType)
+    if (afterHook) {
+      return afterHook(response)
+    }
+    return response
   }
 }

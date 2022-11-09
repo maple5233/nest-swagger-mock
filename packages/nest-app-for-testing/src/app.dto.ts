@@ -6,6 +6,7 @@ import {
   FakeBoolean,
   FakeArrayItemClassType,
 } from 'nest-swagger-mocker'
+import { AfterHook } from 'nest-swagger-mocker/dist/decorators/after-hook'
 
 export class HelloMessageResponse {
   @ApiProperty({
@@ -316,4 +317,15 @@ export class ResponseWithPropertyWhichUseAnyOf {
     ],
   })
   anyOf: Bar | HelloMessageResponse
+}
+
+@AfterHook<{ message: string }>((response) => {
+  response.message = 'hooked'
+  return response
+})
+export class ResponseWithAfterResponseHook {
+  @ApiProperty({
+    type: 'string',
+  })
+  message: string
 }
