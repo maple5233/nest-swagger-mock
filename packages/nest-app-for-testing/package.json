@@ -12,7 +12,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "test": "jest --coverage=false --runInBand"
+    "test:e2e": "jest --coverage=false --runInBand"
   },
   "dependencies": {
     "nest-swagger-mocker": "^1.0.0"
