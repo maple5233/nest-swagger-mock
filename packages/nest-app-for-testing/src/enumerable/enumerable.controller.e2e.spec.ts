@@ -1,7 +1,7 @@
 import superTest from 'supertest'
 import type { INestApplication } from '@nestjs/common'
-import { getAppWithSwagger } from '@/testing-utils/get-app-with-swagger'
 import { EnumerableController } from '@/enumerable/enumerable.controller'
+import { getAppWithSwagger } from '@/testing-utils/get-app-with-swagger'
 import { executeMultipleTimes } from '@/testing-utils/execute-multiple-times'
 
 describe('EnumerableController', () => {

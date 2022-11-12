@@ -1,8 +1,8 @@
 import superTest from 'supertest'
 import type { INestApplication } from '@nestjs/common'
+import { BoolController } from '@/boolean/bool.controller'
 import { getAppWithSwagger } from '@/testing-utils/get-app-with-swagger'
 import { executeMultipleTimes } from '@/testing-utils/execute-multiple-times'
-import { BoolController } from '@/boolean/bool.controller'
 
 describe('BoolController', () => {
   let app: INestApplication

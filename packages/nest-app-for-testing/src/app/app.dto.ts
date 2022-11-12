@@ -5,8 +5,8 @@ import {
   FakeString,
   FakeBoolean,
   FakeArrayItemClassType,
+  AfterHook,
 } from 'nest-swagger-mocker'
-import { AfterHook } from 'nest-swagger-mocker/dist/decorators/after-hook'
 
 export class HelloMessageResponse {
   @ApiProperty({
