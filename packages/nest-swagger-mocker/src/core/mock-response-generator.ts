@@ -155,6 +155,7 @@ export class MockResponseGenerator {
 
   /**
    * check if the key is optional
+   * [!!!] Only work when at least one of key is required
    * @param schema
    * @param key
    * @private

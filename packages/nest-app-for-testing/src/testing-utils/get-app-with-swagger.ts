@@ -16,7 +16,13 @@ export const getAppWithSwagger = async (
   SwaggerModule.setup('api', app, swaggerDocument)
 
   app.useGlobalInterceptors(
-    MockInterceptorFactory.create({ document: swaggerDocument, shouldMockChecker: () => true }),
+    MockInterceptorFactory.create({
+      document: swaggerDocument,
+      shouldMockChecker: () => true,
+      fakerOptions: {
+        defaultProbability: 0.5,
+      },
+    }),
   )
 
   await app.init()
