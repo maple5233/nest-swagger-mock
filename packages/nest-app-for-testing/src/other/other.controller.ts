@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger'
-import { Foo, ObjectHookedByAfterHook, ObjectWithOptionalString } from '@/other/other.dto'
+import { Qux, ObjectHookedByAfterHook, ObjectWithOptionalString } from '@/other/other.dto'
 
 @Controller('other')
 export class OtherController {
@@ -35,13 +35,13 @@ export class OtherController {
     throw new Error('not implemented')
   }
 
-  @ApiExtraModels(Foo)
+  @ApiExtraModels(Qux)
   @Get('/ref-out-side')
   @ApiResponse({
     schema: {
       oneOf: [
         {
-          $ref: getSchemaPath(Foo),
+          $ref: getSchemaPath(Qux),
         },
       ],
     },

@@ -25,7 +25,7 @@ export class ObjectHookedByAfterHook {
   message: string
 }
 
-export class Foo {
+export class Qux {
   @FakeString({
     type: 'uuid',
   })
