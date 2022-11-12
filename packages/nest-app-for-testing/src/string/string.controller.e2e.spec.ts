@@ -3,6 +3,7 @@ import type { INestApplication } from '@nestjs/common'
 import { StringController } from '@/string/string.controller'
 import { getAppWithSwagger } from '@/testing-utils/get-app-with-swagger'
 import { executeMultipleTimes } from '@/testing-utils/execute-multiple-times'
+import { getWordsRegex, uuidRegex } from '@/testing-utils/regex'
 
 describe('StringController', () => {
   let app: INestApplication
@@ -22,7 +23,7 @@ describe('StringController', () => {
           .get('/string')
           .expect(200)
           .then((res) => {
-            expect(res.body.message).toMatch(/^([\w\\\/]+\s?){1,3}$/)
+            expect(res.body.message).toMatch(getWordsRegex(1, 3))
           }),
       ))
 
@@ -32,9 +33,7 @@ describe('StringController', () => {
           .get('/string/uuid')
           .expect(200)
           .then((res) => {
-            expect(res.body.message).toMatch(
-              /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-            )
+            expect(res.body.message).toMatch(uuidRegex)
           }),
       ))
 
@@ -44,7 +43,7 @@ describe('StringController', () => {
           .get('/string/words')
           .expect(200)
           .then((res) => {
-            expect(res.body.message).toMatch(/^([\w\\\/]+\s?){5,10}$/)
+            expect(res.body.message).toMatch(getWordsRegex(5, 10))
           }),
       ))
 
@@ -75,7 +74,7 @@ describe('StringController', () => {
           .get('/string/default')
           .expect(200)
           .then((res) => {
-            expect(res.body.message).toMatch(/^(\w+\s?){1,3}$/)
+            expect(res.body.message).toMatch(getWordsRegex(1, 3))
           }),
       ))
 
@@ -85,7 +84,7 @@ describe('StringController', () => {
           .get('/string/schema')
           .expect(200)
           .then((res) => {
-            expect(res.body.message).toMatch(/^(\w+\s?){1,3}$/)
+            expect(res.body.message).toMatch(getWordsRegex(1, 3))
           }),
       ))
   })
