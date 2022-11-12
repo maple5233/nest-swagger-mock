@@ -224,56 +224,62 @@ export class MockResponseGenerator {
     return fakeClassType
   }
 
-  /**
-   * For allOf, we will merge all the sub schema of the allOf together
-   * @param schema
-   * @param classType
-   * @param propertyKey
-   * @private
-   */
-  private generateValueFromAllOf(schema: SchemaObject, classType: ClassType, propertyKey: string) {
-    if (!schema.allOf) {
+  private generateValueFromXXXOf(
+    schema: SchemaObject,
+    classType: ClassType,
+    propertyKey: string,
+    type: 'oneOf' | 'anyOf' | 'allOf',
+  ) {
+    const subSchemas = schema[type]
+    if (!subSchemas) {
       return
     }
 
-    const responses = schema.allOf.map((subSchema) => {
-      const extraClassType = MockResponseGenerator.getExtraClassType(classType, subSchema)
-      const fakeClassType = MockResponseGenerator.generateFakeClassType(propertyKey, extraClassType)
-      const subClassType = extraClassType ? fakeClassType : classType
-      return this.generateValueFromReferenceObject(subSchema, subClassType, propertyKey)
+    const responses = subSchemas.map((subSchema) => {
+      if ('$ref' in subSchema) {
+        const extraClassType = MockResponseGenerator.getExtraClassType(classType, subSchema)
+        const fakeClassType = MockResponseGenerator.generateFakeClassType(
+          propertyKey,
+          extraClassType,
+        )
+        const subClassType = extraClassType ? fakeClassType : classType
+        return this.generateValueFromReferenceObject(subSchema, subClassType, propertyKey)
+      }
+      return new MockResponseGenerator(
+        this.document,
+        {
+          properties: {
+            data: subSchema,
+          },
+        },
+        class {},
+        this.logger,
+        this.globalFakeOptions,
+      ).generate().data
     })
 
-    return Object.assign({}, ...responses) as Record<string, unknown>
-  }
-
-  private generateValueFromOneOf(schema: SchemaObject, classType: ClassType, propertyKey: string) {
-    if (!schema.oneOf) {
-      return
+    if (type === 'oneOf') {
+      // For oneOf, we will randomly pick one of the sub schema
+      return responses[faker.datatype.number({ min: 0, max: responses.length - 1 })]
     }
 
-    const responses = schema.oneOf.map((subSchema) => {
-      const extraClassType = MockResponseGenerator.getExtraClassType(classType, subSchema)
-      const fakeClassType = MockResponseGenerator.generateFakeClassType(propertyKey, extraClassType)
-      const subClassType = extraClassType ? fakeClassType : classType
-      return this.generateValueFromReferenceObject(subSchema, subClassType, propertyKey)
-    })
-
-    return responses[faker.datatype.number({ min: 0, max: responses.length - 1 })]
-  }
-
-  private generateValueFromAnyOf(schema: SchemaObject, classType: ClassType, propertyKey: string) {
-    if (!schema.anyOf) {
-      return
+    if (type === 'anyOf') {
+      // For anyOf, we will randomly pick any of the sub schema
+      const indexs = Array.from({ length: responses.length }, (_, index) =>
+        faker.datatype.boolean() ? index : null,
+      ).filter((index) => index !== null)
+      if (indexs.length === 0) {
+        // ensure at least one response
+        indexs.push(faker.datatype.number({ min: 0, max: responses.length - 1 }))
+      }
+      const pickedResponses = indexs.map((index) => responses[index!])
+      return Object.assign({}, ...pickedResponses)
     }
 
-    const responses = schema.anyOf.map((subSchema) => {
-      const extraClassType = MockResponseGenerator.getExtraClassType(classType, subSchema)
-      const fakeClassType = MockResponseGenerator.generateFakeClassType(propertyKey, extraClassType)
-      const subClassType = extraClassType ? fakeClassType : classType
-      return this.generateValueFromReferenceObject(subSchema, subClassType, propertyKey)
-    })
-
-    return responses[faker.datatype.number({ min: 0, max: responses.length - 1 })]
+    if (type === 'allOf') {
+      // For allOf, we will merge all the sub schema of the allOf together
+      return Object.assign({}, ...responses) as Record<string, unknown>
+    }
   }
 
   /**
@@ -394,17 +400,17 @@ export class MockResponseGenerator {
       }
 
       if ('allOf' in value) {
-        responseBuilder[key] = this.generateValueFromAllOf(value, currentClassType, key)
+        responseBuilder[key] = this.generateValueFromXXXOf(value, currentClassType, key, 'allOf')
         continue
       }
 
       if ('oneOf' in value) {
-        responseBuilder[key] = this.generateValueFromOneOf(value, currentClassType, key)
+        responseBuilder[key] = this.generateValueFromXXXOf(value, currentClassType, key, 'oneOf')
         continue
       }
 
       if ('anyOf' in value) {
-        responseBuilder[key] = this.generateValueFromAnyOf(value, currentClassType, key)
+        responseBuilder[key] = this.generateValueFromXXXOf(value, currentClassType, key, 'anyOf')
         continue
       }
 
