@@ -8,7 +8,7 @@ import {
   ResponseWithPropertyWhichUseOneOf,
   ResponseWithPropertyWhichUseAnyOf,
   ResponseWithAfterResponseHook,
-} from '@/app.dto'
+} from '@/app/app.dto'
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger'
 
 @Controller()

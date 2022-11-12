@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core'
-import { AppModule } from '@/app.module'
+import { AppModule } from '@/app/app.module'
 import type { SwaggerDocumentOptions } from '@nestjs/swagger'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { MockInterceptorFactory } from 'nest-swagger-mocker'
