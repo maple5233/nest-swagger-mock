@@ -59,8 +59,9 @@ export class MockInterceptor implements NestInterceptor {
       return
     }
 
-    const responseTypeMark =
-      responseTypeMarkRecord[HTTPConstants.HTTP_STATUS_OK] ?? responseTypeMarkRecord.default
+    const responseTypeMark = responseTypeMarkRecord[HTTPConstants.HTTP_STATUS_OK]?.type
+      ? responseTypeMarkRecord[HTTPConstants.HTTP_STATUS_OK]
+      : responseTypeMarkRecord.default
     const extraTypes = MockResponseGenerator.getExtraClassTypes(method)
 
     const fakeClass = class FakeClassForSchema {}
@@ -133,13 +134,13 @@ export class MockInterceptor implements NestInterceptor {
     const actionName = `${context.getClass().name}.${method.name}`
 
     if (this.shouldMockChecker(context)) {
-      const responseTypeAndSchema = this.getResponseTypeAndSchema(method, actionName)
-
-      if (!responseTypeAndSchema) {
-        return next.handle()
-      }
-
       try {
+        const responseTypeAndSchema = this.getResponseTypeAndSchema(method, actionName)
+
+        if (!responseTypeAndSchema) {
+          return next.handle()
+        }
+
         const mockResult = new MockResponseGenerator(
           this.options.document,
           responseTypeAndSchema.schema,
