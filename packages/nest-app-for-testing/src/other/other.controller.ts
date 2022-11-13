@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger'
-import { Qux, ObjectHookedByAfterHook, ObjectWithOptionalString } from '@/other/other.dto'
+import { Qux, ObjectHookedByAfterHook, ObjectWithOptionalString, Custom } from '@/other/other.dto'
 
 @Controller('other')
 export class OtherController {
@@ -47,6 +47,14 @@ export class OtherController {
     },
   })
   getObjectWithRefOutSide() {
+    throw new Error('not implemented')
+  }
+
+  @Get('/custom')
+  @ApiResponse({
+    type: Custom,
+  })
+  getCustom() {
     throw new Error('not implemented')
   }
 }

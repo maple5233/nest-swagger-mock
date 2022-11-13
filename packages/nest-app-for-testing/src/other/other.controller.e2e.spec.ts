@@ -69,5 +69,17 @@ describe('OtherController', () => {
             }),
         1,
       ))
+
+    it('GET /other/custom should return object with name property and the value is chinese', () =>
+      executeMultipleTimes(
+        () =>
+          superTest(app.getHttpServer())
+            .get('/other/custom')
+            .expect(200)
+            .then((res) => {
+              expect(res.body.name).toMatch(/^[\s\w.\u4e00-\u9fa5]+$/)
+            }),
+        10,
+      ))
   })
 })

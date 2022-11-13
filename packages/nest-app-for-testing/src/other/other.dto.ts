@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { AfterHook, FakeString } from 'nest-swagger-mocker'
+import { AfterHook, FakeString, CustomMocking } from 'nest-swagger-mocker'
 
 export class ObjectWithOptionalString {
   @ApiProperty({
@@ -33,4 +33,20 @@ export class Qux {
     type: 'string',
   })
   message: string
+}
+
+@CustomMocking((faker) => {
+  const oldLocale = faker.locale
+  faker.locale = 'zh_CN'
+  const result = {
+    name: faker.name.fullName(),
+  }
+  faker.locale = oldLocale
+  return result
+})
+export class Custom {
+  @ApiProperty({
+    type: 'string',
+  })
+  test: string
 }

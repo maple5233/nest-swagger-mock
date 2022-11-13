@@ -17,10 +17,11 @@ import {
   getFakeExtraClassTypes,
   getFakeNumberOptions,
   getFakeStringOptions,
+  getAfterHook,
+  getCustomMocking,
 } from '@/decorators'
 import { SWAGGER_API_EXTRA_MODELS_METADATA_KEY } from '@/decorators/constants'
 import type { ClassType, IFullFakeOptions } from '@/typings'
-import { getAfterHook } from '@/decorators/after-hook'
 
 export class MockResponseGenerator {
   constructor(
@@ -477,6 +478,17 @@ export class MockResponseGenerator {
     return responseBuilder
   }
 
+  generateFromCustomFunction(currentClassType = this.classType) {
+    if (!currentClassType) {
+      return undefined
+    }
+    const customFunction = getCustomMocking(currentClassType)
+    if (customFunction) {
+      return customFunction(faker)
+    }
+    return undefined
+  }
+
   generate(currentClassType = this.classType): Record<string, unknown> {
     const defaultOrExampleValue = this.generateValueFromDefaultOrExampleOrEnum()
     if (defaultOrExampleValue) {
@@ -484,7 +496,9 @@ export class MockResponseGenerator {
     }
 
     const properties = this.schema.properties ?? {}
-    const response = this.generateValueFromProperties(properties, currentClassType)
+    const customFunctionValue = this.generateFromCustomFunction(currentClassType)
+    const response =
+      customFunctionValue ?? this.generateValueFromProperties(properties, currentClassType)
     if (currentClassType) {
       const afterHook = getAfterHook(currentClassType)
       if (afterHook) {
