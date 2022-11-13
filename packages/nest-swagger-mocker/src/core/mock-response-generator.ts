@@ -304,6 +304,12 @@ export class MockResponseGenerator {
     }
 
     const subClassType = getPropertyMetaDataFromClass<ClassType>(classType, propertyKey)
+    if (subClassType === undefined) {
+      this.logger.warn(
+        `Cannot find metadata for ${classType.name}.${propertyKey}, use {} to mock it, you can use @FakeProperty() to specify the metadata to use the actually class to mock it`,
+      )
+      return {}
+    }
 
     return new MockResponseGenerator(
       this.document,
