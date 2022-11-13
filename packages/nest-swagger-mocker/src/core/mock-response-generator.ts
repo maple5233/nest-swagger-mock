@@ -336,7 +336,7 @@ export class MockResponseGenerator {
       return []
     }
 
-    const count = getArrayCount(classType.prototype, propertyKey) ?? 3
+    const count = getArrayCount((classType ?? class {}).prototype, propertyKey) ?? 3
 
     if ('$ref' in schema.items) {
       // Object(type: ClassType) array
@@ -372,6 +372,12 @@ export class MockResponseGenerator {
 
     // primitive type, use an object as payload and the father ClassType to pass-through the metadata of class property
     const arrayItemSchema = schema.items
+    if (!classType) {
+      this.logger.warn(
+        `Cannot find metadata for item of ${propertyKey}, use [] to mock it, you can use @FakeArrayItemClassType to specify the metadata to use the actually class to mock it`,
+      )
+      return []
+    }
     return Array.from({ length: count })
       .map(() =>
         new MockResponseGenerator(
@@ -479,9 +485,11 @@ export class MockResponseGenerator {
 
     const properties = this.schema.properties ?? {}
     const response = this.generateValueFromProperties(properties, currentClassType)
-    const afterHook = getAfterHook(currentClassType)
-    if (afterHook) {
-      return afterHook(response)
+    if (currentClassType) {
+      const afterHook = getAfterHook(currentClassType)
+      if (afterHook) {
+        return afterHook(response)
+      }
     }
     return response
   }
