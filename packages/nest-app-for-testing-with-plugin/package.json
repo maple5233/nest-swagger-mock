@@ -1,0 +1,20 @@
+{
+  "name": "nest-app-for-testing-with-plugin",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "prebuild": "rimraf dist",
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "test:e2e": "jest --coverage=false --runInBand"
+  },
+  "dependencies": {
+    "nest-swagger-mocker": "^1.0.0"
+  }
+}
