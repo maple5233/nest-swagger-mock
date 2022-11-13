@@ -3,3 +3,8 @@ export const uuidRegex =
 
 export const getWordsRegex = (min: number, max: number) =>
   new RegExp(`^([\\w\\\\\\/]+\\s?){${min},${max}}$`)
+
+export const getWordsWithChineseRegex = (min: number, max: number) =>
+  new RegExp(`^([\\w\\\\\\/\\u4e00-\\u9fa5]+\\s?){${min},${max}}$`)
+
+export const isChineseWord = (word: string) => /^[\u4e00-\u9fa5]+$/.test(word)
