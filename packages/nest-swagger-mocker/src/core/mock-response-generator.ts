@@ -489,16 +489,7 @@ export class MockResponseGenerator {
     return undefined
   }
 
-  generate(currentClassType = this.classType): Record<string, unknown> {
-    const defaultOrExampleValue = this.generateValueFromDefaultOrExampleOrEnum()
-    if (defaultOrExampleValue) {
-      return { ...defaultOrExampleValue }
-    }
-
-    const properties = this.schema.properties ?? {}
-    const customFunctionValue = this.generateFromCustomFunction(currentClassType)
-    const response =
-      customFunctionValue ?? this.generateValueFromProperties(properties, currentClassType)
+  private afterHook(response: Record<string, unknown>, currentClassType = this.classType) {
     if (currentClassType) {
       const afterHook = getAfterHook(currentClassType)
       if (afterHook) {
@@ -506,5 +497,21 @@ export class MockResponseGenerator {
       }
     }
     return response
+  }
+
+  generate(currentClassType = this.classType): Record<string, unknown> {
+    const customFunctionValue = this.generateFromCustomFunction(currentClassType)
+    if (customFunctionValue) {
+      return this.afterHook(customFunctionValue, currentClassType)
+    }
+
+    const defaultOrExampleValue = this.generateValueFromDefaultOrExampleOrEnum()
+    if (defaultOrExampleValue) {
+      return { ...defaultOrExampleValue }
+    }
+
+    const properties = this.schema.properties ?? {}
+    const response = this.generateValueFromProperties(properties, currentClassType)
+    return this.afterHook(response, currentClassType)
   }
 }
