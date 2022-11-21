@@ -30,7 +30,9 @@ export class MockResponseGenerator {
     private readonly classType: ClassType,
     private readonly logger: LoggerService,
     private readonly globalFakeOptions: IFullFakeOptions,
-  ) {}
+  ) {
+    this.classType ??= class {}
+  }
 
   /**
    * make sure the min is less than max
@@ -337,7 +339,10 @@ export class MockResponseGenerator {
       return []
     }
 
-    const count = getArrayCount((classType ?? class {}).prototype, propertyKey) ?? 3
+    const [minCount, maxCount] = getArrayCount((classType ?? class {}).prototype, propertyKey) ?? [
+      3, 3,
+    ]
+    const count = this.generateNumber({ min: minCount, max: maxCount })
 
     if ('$ref' in schema.items) {
       // Object(type: ClassType) array
@@ -359,6 +364,11 @@ export class MockResponseGenerator {
         classType.prototype,
         propertyKey,
       )
+      if (!arrayItemClassTypeFromDecorator) {
+        this.logger.warn(
+          `Cannot find metadata for the item of ${classType.name}.${propertyKey}, the custom fake rule may failed, you can use @FakeArrayItemClassType() to fix the issue`,
+        )
+      }
 
       return Array.from({ length: count }, () =>
         new MockResponseGenerator(

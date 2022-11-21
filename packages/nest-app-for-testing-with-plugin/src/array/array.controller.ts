@@ -6,6 +6,7 @@ import type {
   ObjectArray,
   StringArrayWithRuleAndCount,
   StringArray,
+  ArrayWithCountRange,
 } from '@/array/array.dto'
 
 @Controller('array')
@@ -37,6 +38,11 @@ export class ArrayController {
 
   @Get('/classObjectWithRuleAndCount')
   getClassObjectArrayWithRuleAndCount(): Promise<ClassObjectArrayWithRuleAndCount> {
+    throw new Error('Not implemented')
+  }
+
+  @Get('/countRange')
+  getStringArrayWithCountRange(): Promise<ArrayWithCountRange> {
     throw new Error('Not implemented')
   }
 }

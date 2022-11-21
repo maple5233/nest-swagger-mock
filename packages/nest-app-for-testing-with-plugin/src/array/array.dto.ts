@@ -49,3 +49,8 @@ export class ClassObjectArrayWithRuleAndCount {
   @ArrayCount(10)
   array: StringArrayWithRuleAndCount[]
 }
+
+export class ArrayWithCountRange {
+  @ArrayCount(10, 20)
+  array: string[]
+}

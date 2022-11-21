@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiResponse } from '@nestjs/swagger'
 import {
+  ArrayWithCountRange,
   ClassObjectArray,
   ClassObjectArrayWithRuleAndCount,
   ObjectArray,
@@ -56,6 +57,14 @@ export class ArrayController {
     type: ClassObjectArrayWithRuleAndCount,
   })
   getClassObjectArrayWithRuleAndCount() {
+    throw new Error('Not implemented')
+  }
+
+  @Get('/countRange')
+  @ApiResponse({
+    type: ArrayWithCountRange,
+  })
+  getStringArrayWithCountRange() {
     throw new Error('Not implemented')
   }
 }

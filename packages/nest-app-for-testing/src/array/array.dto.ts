@@ -53,6 +53,7 @@ export class ObjectArray {
 }
 
 export class ClassObjectArray {
+  @FakeArrayItemClassType(StringArray)
   @ApiProperty({
     isArray: true,
     type: StringArray,
@@ -68,4 +69,15 @@ export class ClassObjectArrayWithRuleAndCount {
     type: StringArrayWithRuleAndCount,
   })
   array: StringArrayWithRuleAndCount[]
+}
+
+export class ArrayWithCountRange {
+  @ArrayCount(10, 20)
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'string',
+    },
+  })
+  array: string[]
 }

@@ -42,6 +42,12 @@ class Bar {
   })
   message: string
 
+  @ArrayCount(6)
+  @FakeString({
+    type: 'uuid',
+  })
+  uuidList: string[]
+
   @FakeNumber({
     min: 400,
     max: 404,

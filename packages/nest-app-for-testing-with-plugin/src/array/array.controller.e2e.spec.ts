@@ -3,7 +3,7 @@ import type { INestApplication } from '@nestjs/common'
 import { ArrayController } from '@/array/array.controller'
 import { getAppWithSwagger } from '@/testing-utils/get-app-with-swagger'
 import { executeMultipleTimes } from '@/testing-utils/execute-multiple-times'
-import { uuidRegex } from '@/testing-utils/regex'
+import { getWordsRegex, uuidRegex } from '@/testing-utils/regex'
 
 describe('ArrayController', () => {
   let app: INestApplication
@@ -138,6 +138,27 @@ describe('ArrayController', () => {
                 for (const innerItem of item.array) {
                   expect(innerItem).toMatch(/^I flipped the coin and got: (heads|tails)$/)
                 }
+              }
+            }),
+        10,
+      ))
+
+    it('GET /array/countRange should return an array of length specified', () =>
+      executeMultipleTimes(
+        () =>
+          superTest(app.getHttpServer())
+            .get('/array/countRange')
+            .expect(200)
+            .then((res) => {
+              expect(res.body).toEqual({
+                array: expect.any(Array),
+              })
+
+              expect(res.body.array.length).toBeGreaterThanOrEqual(10)
+              expect(res.body.array.length).toBeLessThanOrEqual(20)
+
+              for (const item of res.body.array) {
+                expect(item).toMatch(getWordsRegex(1, 3))
               }
             }),
         10,

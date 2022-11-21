@@ -74,6 +74,14 @@ describe('ObjectController', () => {
                 expect(typeof item).toBe('object')
                 expect(item.uuid).toMatch(uuidRegex)
               })
+
+              const uuidList = data.uuidList
+              expect(Array.isArray(uuidList)).toBe(true)
+              expect(uuidList).toHaveLength(6)
+              uuidList.forEach((item: unknown) => {
+                expect(typeof item).toBe('string')
+                expect(item).toMatch(uuidRegex)
+              })
             }),
         10,
       ))
