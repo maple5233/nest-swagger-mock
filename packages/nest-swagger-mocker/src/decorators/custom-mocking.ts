@@ -2,7 +2,7 @@ import { FAKE_RESPONSE_CUSTOM_MOCKING_METADATA_KEY } from '@/decorators/constant
 import type { Faker } from '@faker-js/faker'
 
 export const CustomMocking = <TResponse = Record<string, unknown>>(
-  mockingFunction: (response: Faker) => TResponse,
+  mockingFunction: (faker: Faker) => TResponse,
 ): ClassDecorator => Reflect.metadata(FAKE_RESPONSE_CUSTOM_MOCKING_METADATA_KEY, mockingFunction)
 
 export const getCustomMocking = (

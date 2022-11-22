@@ -1,6 +1,12 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger'
-import { Qux, ObjectHookedByAfterHook, ObjectWithOptionalString, Custom } from '@/other/other.dto'
+import {
+  Qux,
+  ObjectHookedByAfterHook,
+  ObjectWithOptionalString,
+  Custom,
+  ObjectWithFakeOptional,
+} from '@/other/other.dto'
 
 @Controller('other')
 export class OtherController {
@@ -9,6 +15,14 @@ export class OtherController {
     type: ObjectWithOptionalString,
   })
   getObjectWithOptionalString() {
+    throw new Error('not implemented')
+  }
+
+  @Get('/fake-optional')
+  @ApiResponse({
+    type: ObjectWithFakeOptional,
+  })
+  getObjectWithFakeOptional() {
     throw new Error('not implemented')
   }
 

@@ -33,6 +33,22 @@ describe('OtherController', () => {
       expect(results.every((result) => result.required)).toBe(true)
     })
 
+    it('GET /other/fake-optional should return property which may be undefined', async () => {
+      const results = await executeMultipleTimes(
+        () =>
+          superTest(app.getHttpServer())
+            .get('/other/fake-optional')
+            .expect(200)
+            .then((res) => res.body.unlucky !== undefined),
+        30,
+      )
+      expect(results).toContain(true)
+      // true ≈ 10% of the time, false ≈ 90% of the time
+      expect(results.filter((result) => result).length).toBeLessThan(
+        results.filter((result) => !result).length,
+      )
+    })
+
     it('GET /other/hooked should return property which is hooked', () =>
       executeMultipleTimes(
         () =>

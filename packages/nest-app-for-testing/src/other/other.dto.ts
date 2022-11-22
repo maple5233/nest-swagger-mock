@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { AfterHook, FakeString, CustomMocking } from 'nest-swagger-mocker'
+import { AfterHook, FakeString, CustomMocking, FakeOptional } from 'nest-swagger-mocker'
 
 export class ObjectWithOptionalString {
   @ApiProperty({
@@ -12,6 +12,15 @@ export class ObjectWithOptionalString {
     type: 'string',
   })
   requiredMessage: string
+}
+
+export class ObjectWithFakeOptional {
+  @FakeOptional(0.1)
+  @ApiProperty({
+    type: 'string',
+    required: false,
+  })
+  unlucky?: string
 }
 
 @AfterHook<{ message: string }>((response) => {

@@ -22,6 +22,7 @@ import {
 } from '@/decorators'
 import { SWAGGER_API_EXTRA_MODELS_METADATA_KEY } from '@/decorators/constants'
 import type { ClassType, IFullFakeOptions } from '@/typings'
+import { getFakeOptional } from '@/decorators/fake-optional'
 
 export class MockResponseGenerator {
   constructor(
@@ -171,10 +172,23 @@ export class MockResponseGenerator {
    * if a key is optional, it may not be in the response,
    * and the default probability of existing is 0.9
    * @param schema
+   * @param currentClassType
    * @param key
    * @private
    */
-  private shouldSkipDueToItIsAnOptionalKey(schema: SchemaObject, key: string) {
+  private shouldSkipDueToItIsAnOptionalKey(
+    schema: SchemaObject,
+    currentClassType: ClassType,
+    key: string,
+  ) {
+    const fakeOptionalOptions = getFakeOptional(currentClassType.prototype, key)
+
+    if (fakeOptionalOptions) {
+      return !MockResponseGenerator.generateBoolean({
+        probability: fakeOptionalOptions ?? this.globalFakeOptions.defaultProbability,
+      })
+    }
+
     return (
       MockResponseGenerator.isOptionalKey(schema, key) &&
       !MockResponseGenerator.generateBoolean({
@@ -414,7 +428,7 @@ export class MockResponseGenerator {
     const responseBuilder: Record<string, unknown> = {}
 
     for (const [key, value] of Object.entries(properties)) {
-      if (this.shouldSkipDueToItIsAnOptionalKey(this.schema, key)) {
+      if (this.shouldSkipDueToItIsAnOptionalKey(this.schema, currentClassType, key)) {
         continue
       }
 
