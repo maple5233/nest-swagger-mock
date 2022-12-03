@@ -119,7 +119,7 @@ Defines the rules for generating a mock boolean.
 
 #### ArrayCount
 
-Defines the rule of how many array items will be
+Defines the rule of how many array items will be 
 
 #####  Parameters
 
@@ -206,3 +206,4 @@ This project is tested by e2e-tesing with @nestjs/core and @nestjs/swagger 6.1.2
 ## 📄 License
 
 [MIT](./LICENSE)
+

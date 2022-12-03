@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
     "lint:staged": "lint-staged",
-    "new": "node scripts/new-package.mjs"
+    "new": "node scripts/new-package.mjs",
+    "publish": "lerna publish --message \"chore(release): publish\""
   },
   "lint-staged": {
     "packages/**/*.{ts,tsx}": [
